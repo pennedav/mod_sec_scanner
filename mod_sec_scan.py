@@ -7,7 +7,7 @@ import argparse
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Process ModSecurity log entries.")
     parser.add_argument('-v', '--verbose', action='store_true',
-                        help='Include a verbose log excerpt in the output.')
+                        help='Include detailed attribute listings in the output.')
     return parser.parse_args()
 
 def extract_rule_violations(verbose):
@@ -26,9 +26,11 @@ def extract_rule_violations(verbose):
             msg = msg_match.group(1)
             file_path = file_match.group(1) if file_match else '-'
             if verbose:
-                # Extract the first 1024 characters of the line and ensure it ends without a newline
-                log_excerpt = line[:1024].rstrip('\n')
-                print(f"\033[91m{rule_id}\033[0m, {file_path}, {msg}, {log_excerpt}\n")
+                # Print details in a structured format
+                print(f"Id: {rule_id}")
+                print(f"File: {file_path}")
+                print(f'Msg: "{msg}"')
+                print("---")  # Separator for each log entry
             else:
                 print(f"\033[91m{rule_id}\033[0m, {file_path}, {msg}\n", end='')
 
