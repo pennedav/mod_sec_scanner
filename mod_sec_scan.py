@@ -3,6 +3,7 @@
 import sys
 import re
 import argparse
+import textwrap
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Process ModSecurity log entries.")
@@ -10,7 +11,21 @@ def parse_arguments():
                         help='Include detailed attribute listings in the output with color coding.')
     parser.add_argument('-vv', '--very-verbose', action='store_true',
                         help='Include detailed attribute listings and the first 1024 characters of the log line.')
+    parser.add_argument('-w', '--wrap', action='store_true',
+                        help='Wrap the output so that each line does not exceed 80 characters.')
     return parser.parse_args()
+
+def wrap_text(text, width=78):
+    wrapper = textwrap.TextWrapper(width=width, subsequent_indent='  ')
+    wrapped_lines = wrapper.wrap(text)
+    return ' \\\n'.join(wrapped_lines) if wrapped_lines else text
+
+def print_verbose_output(label, text, args):
+    if args.wrap:
+        text = wrap_text(f"\033[93m{label}:\033[0m {text}")
+    else:
+        text = f"\033[93m{label}:\033[0m {text}"
+    print(text)
 
 def extract_rule_violations(args):
     # Regex to find rule ids, specific file paths, and msg attribute
@@ -29,15 +44,15 @@ def extract_rule_violations(args):
             file_path = file_match.group(1) if file_match else '-'
             if args.very_verbose:
                 log_excerpt = line[:1024].rstrip('\n')
-                print(f"\033[93mId:\033[0m {rule_id}")
-                print(f"\033[93mFile:\033[0m {file_path}")
-                print(f'\033[93mMsg:\033[0m "{msg}"')
-                print(f"\033[93mLog Excerpt:\033[0m {log_excerpt}")
+                print_verbose_output('Id', rule_id, args)
+                print_verbose_output('File', file_path, args)
+                print_verbose_output('Msg', msg, args)
+                print_verbose_output('Log Excerpt', log_excerpt, args)
                 print()
             elif args.verbose:
-                print(f"\033[93mId:\033[0m {rule_id}")
-                print(f"\033[93mFile:\033[0m {file_path}")
-                print(f'\033[93mMsg:\033[0m "{msg}"')
+                print_verbose_output('Id', rule_id, args)
+                print_verbose_output('File', file_path, args)
+                print_verbose_output('Msg', msg, args)
                 print()
             else:
                 print(f"{rule_id}, {file_path}, {msg}")
