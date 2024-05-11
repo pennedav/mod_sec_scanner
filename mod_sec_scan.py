@@ -30,7 +30,7 @@ def extract_rule_violations(verbose):
                 log_excerpt = line[:1024].rstrip('\n')
                 print(f"\033[91m{rule_id}\033[0m, {file_path}, {msg}, {log_excerpt}\n")
             else:
-                print(f"\033[91m{rule_id}\033[0m, {file_path}, {msg}\n")
+                print(f"\033[91m{rule_id}\033[0m, {file_path}, {msg}\n", end='')
 
 def main():
     args = parse_arguments()
