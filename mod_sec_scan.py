@@ -32,30 +32,35 @@ def extract_rule_violations(args):
     rule_id_pattern = re.compile(r'id "(\d+)"')
     file_pattern = re.compile(r'\[file "(/usr/share/modsecurity-crs/rules/[^"]+)"\]')
     msg_pattern = re.compile(r'msg "(.*?)"')
+    uri_pattern = re.compile(r'\[uri "([^"]+)"\]')
 
     # Read from standard input
     for line in sys.stdin:
         rule_id_match = rule_id_pattern.search(line)
         file_match = file_pattern.search(line)
+        uri_match = uri_pattern.search(line)
         msg_match = msg_pattern.search(line)
         if rule_id_match and msg_match:
             rule_id = rule_id_match.group(1)
             msg = msg_match.group(1)
             file_path = file_match.group(1) if file_match else '-'
+            uri_path = uri_match.group(1) if uri_match else '-'
             if args.very_verbose:
                 log_excerpt = line[:1024].rstrip('\n')
                 print_verbose_output('Id', rule_id, args)
                 print_verbose_output('File', file_path, args)
+                print_verbose_output('Uri', uri_path, args)
                 print_verbose_output('Msg', msg, args)
                 print_verbose_output('Log Excerpt', log_excerpt, args)
                 print()
             elif args.verbose:
                 print_verbose_output('Id', rule_id, args)
                 print_verbose_output('File', file_path, args)
+                print_verbose_output('Uri', uri_path, args)
                 print_verbose_output('Msg', msg, args)
                 print()
             else:
-                print(f"{rule_id}, {file_path}, {msg}")
+                print(f"{rule_id}, {file_path}, {uri_path}, {msg}")
 
 def main():
     args = parse_arguments()
